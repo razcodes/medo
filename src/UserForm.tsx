@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import useResults from './useResults';
 import useEmail from './useEmail';
 
-const MOCK_URL = 'https://mocked-endpoint.com/api/number';
+// const MOCK_URL = 'https://mocked-endpoint.com/api/number';
 
 interface FormState {
   name: string;
