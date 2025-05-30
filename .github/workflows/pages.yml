@@ -15,6 +15,10 @@ jobs:
         with:
           node-version: 20
       - run: npm ci && npm run build
+        env:
+          EMAILJS_SERVICE_ID: ${{ secrets.EMAILJS_SERVICE_ID }}
+          EMAILJS_TEMPLATE_ID: ${{ secrets.EMAILJS_TEMPLATE_ID }}
+          EMAILJS_PUBLIC_KEY: ${{ secrets.EMAILJS_PUBLIC_KEY }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./build
