@@ -2,7 +2,6 @@ import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography, Radio, RadioGroup, FormControlLabel, FormLabel, CircularProgress, SelectChangeEvent } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import useResults from './useResults';
-import useEmail from './useEmail';
 
 // const MOCK_URL = 'https://mocked-endpoint.com/api/number';
 
@@ -24,7 +23,6 @@ const UserForm: React.FC = () => {
   });
 
   const { getResultsCount, getResultsData, loading: resultsLoading, error: resultsError } = useResults();
-  const { sendEmail, loading: emailLoading, error: emailError } = useEmail();
   const navigate = useNavigate();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>) => {
@@ -40,25 +38,19 @@ const UserForm: React.FC = () => {
       const results = await getResultsData();
       const count = await getResultsCount();
 
-      // Send email with results
-      await sendEmail({
-        from_name: form.name,
-        to_name: form.name, // Send to the user's name
-        from_email: form.email,
-        message: `Thank you for your submission!\n\nYour Details:\nAge: ${form.age}\nGender: ${form.gender}\nCondition: ${form.dropdown}`,
-        results, // Include the results data
+      // Navigate to results page with form data and results
+      navigate('/results', {
+        state: {
+          count,
+          formData: form,
+          results
+        }
       });
-
-      // Navigate to results page
-      navigate('/results', { state: { count } });
     } catch (error) {
       console.error('Error:', error);
       // Error is already handled by the hooks
     }
   };
-
-  const loading = resultsLoading || emailLoading;
-  const error = resultsError || emailError;
 
   return (
     <Box sx={{ maxWidth: 400, mx: 'auto', mt: 5 }}>
@@ -122,13 +114,13 @@ const UserForm: React.FC = () => {
             <FormControlLabel value="other" control={<Radio />} label="Other" />
           </RadioGroup>
         </FormControl>
-        <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }} disabled={loading}>
-          {loading ? <CircularProgress size={24} color="inherit" /> : 'Submit'}
+        <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }} disabled={resultsLoading}>
+          {resultsLoading ? <CircularProgress size={24} color="inherit" /> : 'Submit'}
         </Button>
       </form>
-      {error && (
+      {resultsError && (
         <Typography color="error" sx={{ mt: 2 }}>
-          Error: {error.message || 'Something went wrong'}
+          Error: {resultsError.message || 'Something went wrong'}
         </Typography>
       )}
     </Box>
