@@ -6,7 +6,7 @@ import './App.css';
 
 function App() {
   return (
-    <Router>
+    <Router basename="/medo">
       <Routes>
         <Route path="/" element={<UserForm />} />
         <Route path="/results" element={<ResultsPage />} />
