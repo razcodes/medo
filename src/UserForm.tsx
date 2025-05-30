@@ -2,6 +2,7 @@ import React, { useState, ChangeEvent, FormEvent } from 'react';
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography, Radio, RadioGroup, FormControlLabel, FormLabel, CircularProgress, SelectChangeEvent } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import useResults from './useResults';
+import useEmail from './useEmail';
 
 const MOCK_URL = 'https://mocked-endpoint.com/api/number';
 
@@ -22,7 +23,8 @@ const UserForm: React.FC = () => {
     gender: '',
   });
 
-  const { getResultsCount, loading, error } = useResults();
+  const { getResultsCount, getResultsData, loading: resultsLoading, error: resultsError } = useResults();
+  const { sendEmail, loading: emailLoading, error: emailError } = useEmail();
   const navigate = useNavigate();
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>) => {
@@ -32,9 +34,31 @@ const UserForm: React.FC = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const count = await getResultsCount();
-    navigate('/results', { state: { count } });
+
+    try {
+      // Get results data
+      const results = await getResultsData();
+      const count = await getResultsCount();
+
+      // Send email with results
+      await sendEmail({
+        from_name: form.name,
+        to_name: form.name, // Send to the user's name
+        from_email: form.email,
+        message: `Thank you for your submission!\n\nYour Details:\nAge: ${form.age}\nGender: ${form.gender}\nCondition: ${form.dropdown}`,
+        results, // Include the results data
+      });
+
+      // Navigate to results page
+      navigate('/results', { state: { count } });
+    } catch (error) {
+      console.error('Error:', error);
+      // Error is already handled by the hooks
+    }
   };
+
+  const loading = resultsLoading || emailLoading;
+  const error = resultsError || emailError;
 
   return (
     <Box sx={{ maxWidth: 400, mx: 'auto', mt: 5 }}>
